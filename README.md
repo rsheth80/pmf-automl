@@ -27,6 +27,13 @@ Tested with Python 3.6.5 on Ubuntu 16.04.5. Requires numpy, pandas, sklearn, tor
 
 **utils.py** contains some useful auxiliary classes and functions.
 
+**plotting.py** contains functions to visualize the results of the evaluation. Additionally requires matplotlib. To plot regret/rank curves after evaluation finishes:
+
+    import plotting
+
+    plotting.compare_regrets(results)
+    plotting.compare_ranks(results)
+
 ## Notes
 
 1. **Typo** in the paper and supplementary material: **553 total datasets were used in the experiments**, not 564.
