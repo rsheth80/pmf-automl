@@ -40,7 +40,7 @@ class GP(nn.Module):
         if ix is None:
             ix = torch.arange(0, self.N)
 
-        return torch.potrf(self.kernel(self.X[ix])
+        return torch.cholesky(self.kernel(self.X[ix])
                            + torch.eye(ix.numel())
                                 *transform_forward(self.variance),
                            upper=False)
