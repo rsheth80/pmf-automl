@@ -64,16 +64,16 @@ class GP(nn.Module):
                 ix = self.get_batch.ix
                 Ks = self.kernel(self.X[ix], Xtest)
                 L = self.get_cov(ix)
-                alpha = torch.trtrs(Ks, L, upper=False)[0]
+                alpha = torch.triangular_solve(Ks, L, upper=False)[0]
                 fmean = torch.matmul(torch.t(alpha),
-                                     torch.trtrs(self.y.v.squeeze(), L,
+                                     torch.triangular_solve(self.y.v.squeeze(), L,
                                                  upper=False)[0])
             else:
                 Ks = self.kernel(self.X, Xtest)
                 L = self.get_cov()
-                alpha = torch.trtrs(Ks, L, upper=False)[0]
+                alpha = torch.triangular_solve(Ks, L, upper=False)[0]
                 fmean = torch.matmul(torch.t(alpha),
-                                     torch.trtrs(self.y, L, upper=False)[0])
+                                     torch.triangular_solve(self.y, L, upper=False)[0])
             fvar = transform_forward(self.kernel.variance) - (alpha**2).sum(0)
 
             return fmean, fvar.reshape((-1,1))
