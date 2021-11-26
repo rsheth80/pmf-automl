@@ -8,6 +8,7 @@ import kernels
 import gplvm
 from utils import transform_forward, transform_backward
 import bo
+import pickle
 
 torch.set_default_tensor_type(torch.FloatTensor)
 
@@ -150,6 +151,7 @@ def random_search(bo_n_iters, ytest, speed=1, do_print=False):
 
     return np.asarray(ybest_list)
 
+
 if __name__=='__main__':
 
     # train and evaluation settings
@@ -168,6 +170,7 @@ if __name__=='__main__':
     Ytrain, Ytest, Ftrain, Ftest = get_data()
     maxiter = int(Ytrain.shape[1]/batch_size*n_epochs)
 
+    
     def f_stop(m, v, it, t):
 
         if it >= maxiter-1:
@@ -179,6 +182,8 @@ if __name__=='__main__':
     varn_list = []
     logpr_list = []
     t_list = []
+    
+
     def f_callback(m, v, it, t):
         varn_list.append(transform_forward(m.variance).item())
         logpr_list.append(m().item()/m.D)
@@ -208,11 +213,13 @@ if __name__=='__main__':
     print('training...')
     optimizer = torch.optim.SGD(m.parameters(), lr=lr)
     m = train(m, optimizer, f_callback=f_callback, f_stop=f_stop)
+    
     if save_checkpoint:
         torch.save(m.state_dict(), fn_checkpoint + '_itFinal.pt')
 
+
     # evaluate model and random baselines
-    print('evaluating...')
+    print('evaluating...') 
     with torch.no_grad():
         Ytest = Ytest.astype(np.float32)
 
@@ -239,3 +246,6 @@ if __name__=='__main__':
                    'random2x': regrets_random2x,
                    'random4x': regrets_random4x,
                   }
+        
+        with open('results.pkl','wb') as f:
+            pickle.dump(results,f)
