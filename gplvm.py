@@ -40,7 +40,7 @@ class GP(nn.Module):
         if ix is None:
             ix = torch.arange(0, self.N)
 
-        return torch.cholesky(self.kernel(self.X[ix])
+        return torch.potrf(self.kernel(self.X[ix])
                            + torch.eye(ix.numel())
                                 *transform_forward(self.variance),
                            upper=False)
@@ -64,16 +64,16 @@ class GP(nn.Module):
                 ix = self.get_batch.ix
                 Ks = self.kernel(self.X[ix], Xtest)
                 L = self.get_cov(ix)
-                alpha = torch.triangular_solve(Ks, L, upper=False)[0]
+                alpha = torch.trtrs(Ks, L, upper=False)[0]
                 fmean = torch.matmul(torch.t(alpha),
-                                     torch.triangular_solve(self.y.v.squeeze(), L,
+                                     torch.trtrs(self.y.v.squeeze(), L,
                                                  upper=False)[0])
             else:
                 Ks = self.kernel(self.X, Xtest)
                 L = self.get_cov()
-                alpha = torch.triangular_solve(Ks, L, upper=False)[0]
+                alpha = torch.trtrs(Ks, L, upper=False)[0]
                 fmean = torch.matmul(torch.t(alpha),
-                                     torch.triangular_solve(self.y, L, upper=False)[0])
+                                     torch.trtrs(self.y, L, upper=False)[0])
             fvar = transform_forward(self.kernel.variance) - (alpha**2).sum(0)
 
             return fmean, fvar.reshape((-1,1))
